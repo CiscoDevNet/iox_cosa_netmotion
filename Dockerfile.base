@@ -1,0 +1,9 @@
+FROM python:alpine
+
+RUN apk update
+
+RUN apk add --virtual .run-deps openssh libffi rsync && \
+    apk add --virtual .build-deps gcc libc-dev libffi-dev openssl-dev make
+
+RUN pip install --upgrade pip
+
