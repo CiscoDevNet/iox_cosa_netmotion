@@ -17,11 +17,8 @@ app:
         interface-name: eth0
         ports:
           tcp:
-           - 5100
+           - 8000
   startup:
     rootfs: rootfs.tar
-    target:
-    - /bin/sh
-    - -c
-    - /usr/local/bin/python app.py
+    target: /usr/local/bin/python app.py
   type: docker
