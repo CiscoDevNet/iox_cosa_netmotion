@@ -1,41 +1,232 @@
+from paramiko import SSHClient as SSHClient
 import paramiko
+import re
+import time
+import config as config
+
+
+verbose = True
+cellular_data0 = {}
+cellular_data1 = {}
+cell_gps_data = {}
+
+
+class sshClient(SSHClient):  #Extends the paramiko.SSHClient Class for code re-use
+    AutoAddPolicy = paramiko.AutoAddPolicy()
+
+
+def terminal_command(conn, command):  # function to drive terminal commands
+    conn.send(command + '\n')
+    time.sleep(1)
+    output = conn.recv(65535)
+    if verbose == True:
+        return output
+    else:
+        return "No output"
+
+
+# Function to convert Location data to decimal location data
+def dms2dd(degrees, minutes, seconds, direction):
+    dd = float(degrees) + float(minutes)/60 + float(seconds)/(60*60)
+    if direction == 'W' or direction == 'S':
+        dd *= -1
+    return dd
+
+
+# Clean, Filter, and Parse GPS Data
+def cell_gps(dt):
+
+    gps = {}
+
+    data = dt
+
+    # Cleaning the console data
+    data_clean0 = data.replace(" ", "")
+    data_clean1 = data_clean0.replace("\n", " ")
+    data1 = dict(re.findall(r'(\S+):(".*?"|\S+)', data_clean1))
+
+    test_dict = {"value": "1"}
+
+    test_dict.update(data1)
+
+    # Parse Directional Data
+    try:
+        dmsNS = (re.split('[DegMinSecorth]+', data1["Latitude"]))[:4]
+        dmsEW = (re.split('[DegMinSecest]+', data1["Longitude"]))[:4]
+    except Exception:
+        dmsNS = "None"
+        dmsEW = "None"
+
+    try:
+        gps["Latitude"] = dms2dd(*dmsNS)
+        gps["Longitude"] = dms2dd(*dmsEW)
+    except Exception:
+        gps["Latitude"] = "Incomplete"
+        gps["Longitude"] = "Incomplete"
+
+    gps["Status"] = data1.get("GPSautotrackingstatus", "None")
+    gps["Accuracy"] = "NA"
+    gps["HDOP"] = "NA"
+
+    return gps
+
+
+# Clean, Filter, and Parse Connection Data
+def cell_connection(dt):
+
+    conn = {}
+
+    data = dt
+    data_clean0 = data.replace(" ", "")
+    data_clean1 = data_clean0.replace("\n", " ")
+
+    #print(data_clean1)
+
+    try:
+        conn["TXbytes"] = re.search('Transmitted=(\d+)', data_clean1).group(1)
+        conn["RXbytes"] = re.search('Received=(\d+)', data_clean1).group(1)
+    except Exception:
+        conn["TXbytes"] = "0"
+        conn["RXbytes"] = "0"
+
+    return conn
+
+
+# Clean, Filter, and Parse Network Data
+def cell_network_lte(dt):
+
+    network = {}
+
+    data = dt
+    data_clean0 = data.replace(" ", "")
+    data_clean1 = data_clean0.replace("\n", " ")
+
+    data1 = dict(re.findall(r'(\S+)=(".*?"|\S+)', data_clean1))
+
+    network["Roaming"] = data1.get("CurrentRoamingStatus", "None")
+    network["PLMN"] = data1.get("MobileCountryCode(MCC)", "None") + "-" + data1.get("MobileNetworkCode(MNC)", "None")
+
+    return network
+
+
+# Clean, Filter, and Parse Radio Data
+def cell_radio(dt):
+
+    radio = {}
+
+    data = dt
+    data_clean0 = data.replace(" ", "")
+    data_clean1 = data_clean0.replace("\n", " ")
+
+    data1 = dict(re.findall(r'(\S+)=(".*?"|\S+)', data_clean1))
+
+    radio["Technology"] = data1.get("RadioAccessTechnology(RAT)Selected", "None")
+    radio["RSSI"] = data1.get("CurrentRSSI", "None")
+    radio["RSRP"] = data1.get("CurrentRSRP", "None")
+    radio["RSRQ"] = data1.get("CurrentRSRQ", "None")
+    radio["SINR"] = data1.get("CurrentSNR", "None")
+    radio["Connected"] = data1.get("Radiopowermode", "None")
+
+    return radio
+
+
+# Clean, Filter, and Parse Hardware Data
+def cell_hardware(dt):
+
+    hardware = {}
+
+    data = dt
+    data_clean0 = data.replace(" ", "")
+    #print(data_clean0)
+    data_clean1 = data_clean0.replace("\n", " ")
+
+    data1 = dict(re.findall(r'(\S+)=(".*?"|\S+)', data_clean1))
+    #print(data1)
+
+    hardware["IMEI"] = data1.get("InternationalMobileEquipmentIdentity(IMEI)", "None")
+    hardware["IMSI"] = data1.get("InternationalMobileSubscriberIdentity(IMSI)", "None")
+    hardware["PhoneNumber"] = data1.get("DigitalNetwork-Number(MSISDN)", "None")
+
+    try:
+        hardware["Carrier"] = (re.search('Carrier=(\S+)', data_clean1).group(1))
+    except Exception:
+        hardware["Carrier"] = "None"
+
+    return hardware
 
 
 # Logic for getting Cell Data
 def cell_data():
+    # credentials for the router
+    ir_router = config.cfg.get("ir_router_info", "IP")
 
-    cell_int0 = {
-        "ID": "WWAN0",
-        "IMEI": "353776060002670",
-        "IMSI": "325911480066607802",
-        "PhoneNumber": "4255551212",
-        "Connected": "Connected",
-        "Technology": "CDMA 1xEV-DO Rev A",
-        "Roaming": "Home",
-        "SID": "6-12",
-        "TXbytes": "546780",
-        "RXbytes": "859300",
-        "RSSI": "-68",
-        "SINR": "30"
-    }
+    ir_port = config.cfg.get("ir_router_info", "port")
 
-    cell_int1 = {
-        "ID": "WWAN1",
-        "IMEI": "359225050020502",
-        "IMSI": "32023699260",
-        "PhoneNumber": "2065551212",
-        "Connected": "Connected",
-        "Technology": "LTE",
-        "Roaming": "Home",
-        "PLMN": "123-456",
-        "TXbytes": "1560780",
-        "RXbytes": "2879300",
-        "RSSI": "-57",
-        "RSRP": "-79",
-        "RSRQ": "-9",
-        "SINR": "30"
-    }
+    ir_user = config.cfg.get("ir_router_info", "user")
 
-    cd = [cell_int0, cell_int1]
+    ir_passwd = config.cfg.get("ir_router_info", "pass")
 
-    return cd
+    # setting up the terminal connection to the router
+    ir_client = sshClient()
+    ir_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ir_client.connect(ir_router, port=ir_port, username=ir_user, password=ir_passwd, look_for_keys=False, allow_agent=False)
+
+    # setting up the shell to issue commands
+    ir_conn = ir_client.invoke_shell()
+
+    # terminal commands to gather cell int 0 and cell int 1 data
+    # and GPS Data
+    terminal_command(ir_conn, '')
+    hw_data0 = (terminal_command(ir_conn, 'show cell 0/0 hardware').decode("utf-8"))
+    radio_data0 = (terminal_command(ir_conn, 'show cell 0/0 radio').decode("utf-8"))
+    network_data0 = (terminal_command(ir_conn, 'show cell 0/0 network').decode("utf-8"))
+    terminal_command(ir_conn, "\x03").decode("utf-8")
+    connection_data0 = (terminal_command(ir_conn, 'show cell 0/0 connection').decode("utf-8"))
+    #print(connection_data0)
+
+    hw_data1 = (terminal_command(ir_conn, 'show cell 1/0 hardware').decode("utf-8"))
+    radio_data1 = (terminal_command(ir_conn, 'show cell 1/0 radio').decode("utf-8"))
+    network_data1 = (terminal_command(ir_conn, 'show cell 1/0 network').decode("utf-8"))
+    connection_data1 = (terminal_command(ir_conn, 'show cell 1/0 connection').decode("utf-8"))
+
+    gps_data = (terminal_command(ir_conn, 'show cell 0/0 gps').decode("utf-8"))
+
+    #print("Cell Interface 0 Data\n")
+    cellular_data0.update({"ID": "Cell 0/0"})
+    cellular_data0.update(cell_hardware(hw_data0))
+    cellular_data0.update(cell_network_lte(network_data0))
+    cellular_data0.update(cell_radio(radio_data0))
+    #print(cellular_data0)
+    cellular_data0.update(cell_connection(connection_data0))
+    #print(cellular_data0)
+    #print("\n")
+
+    #print("Cell Interface 1 Data\n")
+    cellular_data1.update({"ID": "Cell 1/0"})
+    cellular_data1.update(cell_hardware(hw_data1))
+    cellular_data1.update(cell_network_lte(network_data1))
+    cellular_data1.update(cell_radio(radio_data1))
+    cellular_data1.update(cell_connection(connection_data1))
+    #print(cellular_data1)
+    #print("\n")
+
+    #print("Combined Cell Data")
+    cd = [cellular_data0, cellular_data1]
+    #print(cd)
+
+    #print("GPS Data\n")
+    gps = cell_gps(gps_data)
+    #print(gps)
+    #print("\n")
+
+    #print("Cell and GPS Data combined")
+    cell_gps_data["CellularInterface"] = cd
+    cell_gps_data["Location"] = gps
+    #print(cell_gps_data)
+
+    ir_client.close()
+
+    return cell_gps_data
+
+
+#print(cell_data())

@@ -1,0 +1,27 @@
+descriptor-schema-version: "2.2"
+info:
+  name: coas_test
+  version: latest
+app:
+  cpuarch: x86_64
+  env:
+    GPG_KEY: 0D96DF4D4110E5C43FBFB17F2D347EA6AA65421D
+    LANG: C.UTF-8
+    PATH: /usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    PYTHON_PIP_VERSION: "18.0"
+    PYTHON_VERSION: 3.7.0
+  resources:
+    profile: c1.small
+    network:
+      -
+        interface-name: eth0
+        ports:
+          tcp:
+           - 5100
+  startup:
+    rootfs: rootfs.tar
+    target:
+    - /bin/sh
+    - -c
+    - /usr/local/bin/python app.py
+  type: docker
