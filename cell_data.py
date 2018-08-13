@@ -43,7 +43,9 @@ def cell_gps(dt):
     # Cleaning the console data
     data_clean0 = data.replace(" ", "")
     data_clean1 = data_clean0.replace("\n", " ")
-    data1 = dict(re.findall(r'(\S+):(".*?"|\S+)', data_clean1))
+    #adding another clean for later detail lines that are seperated by commas instead of linebreaks or spaces
+    data_clean2 = data_clean1.replace(","," ")
+    data1 = dict(re.findall(r'(\S+):(".*?"|\S+)', data_clean2))
 
     test_dict = {"value": "1"}
 
@@ -65,7 +67,7 @@ def cell_gps(dt):
         gps["Longitude"] = "Incomplete"
 
     gps["Status"] = data1.get("GPSautotrackingstatus", "None")
-    gps["Accuracy"] = "NA"
+#    gps["Accuracy"] = "NA"
     gps["HDOP"] = data1.get("HDOP", "None")
 
     return gps
