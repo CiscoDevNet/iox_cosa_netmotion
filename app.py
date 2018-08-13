@@ -3,6 +3,7 @@ from flask import Flask,request, jsonify
 import cell_data
 import wifi_data
 import active_int
+import version_data
 import time
 
 app = Flask(__name__)
@@ -10,6 +11,7 @@ app = Flask(__name__)
 cd = {}
 wd = {}
 wan = {}
+ver = {}
 
 thread0 = None
 thread1 = None
@@ -43,19 +45,28 @@ def bg_act_int():
         time.sleep(2)
 
 
+def bg_ver():
+    global ver
+
+    while True:
+        ver = version_data.version_data()
+
+        time.sleep(2)
+
+
 @app.route('/all')
 def cosa():
     cd = cell_data.cell_data()
     wd = wifi_data.wifi_data()
     wan = active_int.active_int()
+    ver = version_data.version_data()
 
     iox_data = {
         "Manufacturer": "Cisco",
-        "Model": "IR829",
-        "HWVersion": "NA",
-        "FWVersion": "NA"
+        "Model": "IR829"
     }
 
+    iox_data.update(ver)
     iox_data.update(cd)
     iox_data.update(wd)
     iox_data.update(wan)
