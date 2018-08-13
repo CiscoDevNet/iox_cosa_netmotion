@@ -66,7 +66,7 @@ def cell_gps(dt):
 
     gps["Status"] = data1.get("GPSautotrackingstatus", "None")
     gps["Accuracy"] = "NA"
-    gps["HDOP"] = "NA"
+    gps["HDOP"] = data1.get("HDOP", "None")
 
     return gps
 
@@ -189,7 +189,7 @@ def cell_data():
     network_data1 = (terminal_command(ir_conn, 'show cell 1/0 network').decode("utf-8"))
     connection_data1 = (terminal_command(ir_conn, 'show cell 1/0 connection').decode("utf-8"))
 
-    gps_data = (terminal_command(ir_conn, 'show cell 0/0 gps').decode("utf-8"))
+    gps_data = (terminal_command(ir_conn, 'show cell 0/0 gps detail').decode("utf-8"))
 
     #print("Cell Interface 0 Data\n")
     cellular_data0.update({"ID": "Cell 0/0"})
