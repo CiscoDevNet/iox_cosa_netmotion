@@ -36,7 +36,7 @@ def cell_sw_ver(dt):
     data_clean2 = data_clean1.replace(",", " ")
     data1 = dict(re.findall(r'(\S+):(".*?"|\S+)', data_clean2))
 
-    ver["SWVersion"] = data1.get("Version", "None")
+    ver["FWVersion"] = data1.get("Version", "None")
 
     #print("Data from Show Ver SW: \n{0}".format(data1))
 
