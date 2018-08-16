@@ -11,7 +11,7 @@ class sshClient(SSHClient):  #Extends the paramiko.SSHClient Class for code re-u
     AutoAddPolicy = paramiko.AutoAddPolicy()
 
 
-def terminal_command(conn, command, sleepTime = 1.5):  # function to drive terminal commands
+def terminal_command(conn, command, sleepTime = 1):  # function to drive terminal commands
     conn.send(command + '\n')
     time.sleep(sleepTime)
     output = conn.recv(65535)
@@ -69,7 +69,11 @@ def wifi_data0_parse(dt):
 
 
     # BAS 8-15 - Added ID field from AP Name
-    wifi_info["ID"] = ID
+    if ID != "None":
+        wifi_info["ID"] = "{}.WLAN-1".format(ID)
+    else:
+        wifi_info["ID"] = "WLAN-1".format(ID)
+
     wifi_info["SSID"] = SSID
     wifi_info["BSSID"] = BSSID
     wifi_info["Authentication"] = Authentication
@@ -157,7 +161,7 @@ def wifi_data():
     ap_hostname = config.cfg.get("ap_info", "host") + "." + config.cfg.get("ir_router_info", "domain")
 
     terminal_command(ir_conn, '')
-    ap_data = terminal_command(ir_conn, "show cdp entry %s" % ap_hostname)
+    ap_data = terminal_command(ir_conn, "show cdp entry %s" % ap_hostname, 2)
 
     ap_ip = ap_ip_extract(ap_data)
 
@@ -196,10 +200,12 @@ def wifi_data():
         ## Remote AP Access
         terminal_command(ir_conn, 'ssh -l %s %s' % (ap_user, ap_ip))
         time.sleep(2)
-        terminal_command(ir_conn, ap_passwd + "\r\n")
+        terminal_command(ir_conn, ap_passwd + "\r\n", 2.5)
+        #time.sleep(1)
 
-        wifi_data0 = terminal_command(ir_conn, "show dot11 associations all-client interface Dot11Radio 1\n  ", 1.5)
-        wifi_data1 = terminal_command(ir_conn, "show controllers dot11Radio 1 radio-stats\n  \n  \n", 1.5)
+
+        wifi_data0 = terminal_command(ir_conn, "show dot11 associations all-client interface Dot11Radio 1\n  ")
+        wifi_data1 = terminal_command(ir_conn, "show controllers dot11Radio 1 radio-stats\n  \n  \n")
 
         #print(wifi_data0.decode('utf-8'))
         #print(wifi_data1.decode('utf-8'))
@@ -209,12 +215,13 @@ def wifi_data():
         wgb0.update({"WGB WiFi Status": "Connected"})
         wgb0.update({"Technology": "802.11n"})
 
-        wd = [wgb0]
+        #wd = [wgb0]
 
-    final_wifi_data = {"WifiInterface": wd}
+    #final_wifi_data = {"Interface": wd}
 
     ir_client.close()
 
-    return final_wifi_data
+    #return final_wifi_data
+    return wgb0
 
 #print(wifi_data())

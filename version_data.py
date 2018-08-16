@@ -13,9 +13,9 @@ class sshClient(SSHClient):  #Extends the paramiko.SSHClient Class for code re-u
     AutoAddPolicy = paramiko.AutoAddPolicy()
 
 
-def terminal_command(conn, command):  # function to drive terminal commands
+def terminal_command(conn, command, sleepTime=1.5):  # function to drive terminal commands
     conn.send(command + '\n')
-    time.sleep(1)
+    time.sleep(sleepTime)
     output = conn.recv(65535)
     if verbose == True:
         return output
@@ -53,7 +53,10 @@ def cell_hw_ver(dt):
     # Cleaning the console data
     data1 = re.findall(r'Cisco\ (.*?)\ with', data)
 
-    ver['HWVersion'] = data1[0]
+    try:
+        ver["HWVersion"] = data1[0]
+    except Exception:
+        ver["HWVersion"] = "None"
     #print("Data from Show Ver HW: \n{0}".format(data1))
 
     return ver
@@ -82,7 +85,7 @@ def version_data():
     # and GPS Data
     terminal_command(ir_conn, '')
     ver_data0 = (terminal_command(ir_conn, 'show ver | include Version').decode("utf-8"))
-    ver_data1 = (terminal_command(ir_conn, 'show ver | include revision').decode("utf-8"))
+    ver_data1 = (terminal_command(ir_conn, 'show ver | include revision', 2).decode("utf-8"))
 
     #print("Version Data\n")
     ver_data.update(cell_sw_ver(ver_data0))

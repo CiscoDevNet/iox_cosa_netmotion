@@ -102,7 +102,7 @@ def cell_connection(dt):
         if status == 'ACTIVE':
             active_prof.append(profile)
 
-    conn['ActiveProfiles'] = active_prof
+    #conn['ActiveProfiles'] = active_prof
 
     return conn
 
@@ -230,7 +230,7 @@ def cell_data():
 
     # Had to adjust the terminal command to allow for variable sleep timing,
     # Searching the running config takes a bit longer
-    host_data = (terminal_command(ir_conn, 'show run | include hostname', 2.5).decode("utf-8"))
+    host_data = (terminal_command(ir_conn, 'show run | include hostname', 3).decode("utf-8"))
 
 
     #print("Cell Interface 0 Data\n")
@@ -264,6 +264,7 @@ def cell_data():
     #print("\n")
 
     #print("Cell and GPS Data combined")
+    #cell_gps_data["CellularInterface"] = cd
     cell_gps_data["CellularInterface"] = cd
     cell_gps_data["Location"] = gps
     #print(cell_gps_data)
