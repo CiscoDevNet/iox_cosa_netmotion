@@ -36,6 +36,12 @@ def wifi_data0_parse(dt):
     wifi_info = {}
     wifi0 = dt.decode('utf-8')
     #print(wifi0)
+
+    # BAS 8-15 - Added ID field from AP Name
+    if (re.search('Name\s+: (\S+)', wifi0)) != None:
+        ID = re.search('Name\s+: (\S+)', wifi0).group(1)
+    else:
+        ID = "None"
     if (re.search('SSID\s+: (\S+)', wifi0)) != None:
         SSID = re.search('SSID\s+: (\S+)', wifi0).group(1)
     else:
@@ -61,11 +67,14 @@ def wifi_data0_parse(dt):
     else:
         Encryption = "None"
 
+    # BAS 8-15 - Added ID field from AP Name
+    wifi_info["ID"] = ID
     wifi_info["SSID"] = SSID
     wifi_info["BSSID"] = BSSID
     wifi_info["Authentication"] = Authentication
     wifi_info["RSSI"] = RSSI
-    wifi_info["SNR"] = SNR
+    # BAS 8-15 - Changed SNR to Signal to match the language from Netmotion API and other calls
+    wifi_info["Signal"] = SNR
     wifi_info["Encryption"] = Encryption
 
     return wifi_info
