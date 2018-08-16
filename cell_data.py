@@ -15,9 +15,9 @@ class sshClient(SSHClient):  #Extends the paramiko.SSHClient Class for code re-u
     AutoAddPolicy = paramiko.AutoAddPolicy()
 
 
-def terminal_command(conn, command):  # function to drive terminal commands
+def terminal_command(conn, command, sleepTime = 1):  # function to drive terminal commands
     conn.send(command + '\n')
-    time.sleep(1)
+    time.sleep(sleepTime)
     output = conn.recv(65535)
     if verbose == True:
         return output
@@ -82,7 +82,9 @@ def cell_connection(dt):
     data_clean0 = data.replace(" ", "")
     data_clean1 = data_clean0.replace("\n", " ")
 
-    #print(data_clean1)
+    data_clean_profiles = data_clean0.replace(",PacketSessionStatus", "")
+
+    #print('data_clean_profiles: \n{}'.format(data_clean_profiles))
 
     try:
         conn["TXbytes"] = re.search('Transmitted=(\d+)', data_clean1).group(1)
@@ -90,6 +92,17 @@ def cell_connection(dt):
     except Exception:
         conn["TXbytes"] = "0"
         conn["RXbytes"] = "0"
+
+    profiles = dict(re.findall(r'(Profile\S+)=(".*?"|\S+)', data_clean_profiles))
+
+    #print('profiles: \n{}'.format(profiles))
+
+    active_prof = []
+    for profile, status in profiles.items():
+        if status == 'ACTIVE':
+            active_prof.append(profile)
+
+    conn['ActiveProfiles'] = active_prof
 
     return conn
 
@@ -157,6 +170,27 @@ def cell_hardware(dt):
     return hardware
 
 
+def rtr_hostname(dt, cellInt):
+
+    hostname = {}
+
+    #Split the 3 lines (0-command entry, 1-actual response, 2-next open prompt)
+    data = dt.split('\n')
+    data_clean0 = data[1].replace(" ", "=")
+
+    #print('hostname data: {0}'.format(data_clean0))
+
+    data0 = dict(re.findall(r'(\S+)=(".*?"|\S+)', data_clean0))
+
+    try:
+        hostname['ID'] = '{0}.{1}'.format(data0['hostname'], cellInt)
+    except Exception:
+        hostname['ID'] = cellInt
+
+    #print('hostname: {0}'.format(hostname))
+
+    return hostname
+
 # Logic for getting Cell Data
 def cell_data():
     # credentials for the router
@@ -192,9 +226,16 @@ def cell_data():
     connection_data1 = (terminal_command(ir_conn, 'show cell 1/0 connection').decode("utf-8"))
 
     gps_data = (terminal_command(ir_conn, 'show cell 0/0 gps detail').decode("utf-8"))
+    terminal_command(ir_conn, "\x03").decode("utf-8")
+
+    # Had to adjust the terminal command to allow for variable sleep timing,
+    # Searching the running config takes a bit longer
+    host_data = (terminal_command(ir_conn, 'show run | include hostname', 2.5).decode("utf-8"))
+
 
     #print("Cell Interface 0 Data\n")
-    cellular_data0.update({"ID": "Cell 0/0"})
+    cellular_data0.update(rtr_hostname(host_data, 'Cell-0'))
+    #cellular_data0.update({'ID': 'Cell 0/0'})
     cellular_data0.update(cell_hardware(hw_data0))
     cellular_data0.update(cell_network_lte(network_data0))
     cellular_data0.update(cell_radio(radio_data0))
@@ -204,7 +245,8 @@ def cell_data():
     #print("\n")
 
     #print("Cell Interface 1 Data\n")
-    cellular_data1.update({"ID": "Cell 1/0"})
+    cellular_data1.update(rtr_hostname(host_data, 'Cell-1'))
+    #cellular_data0.update({'ID': 'Cell 1/1'})
     cellular_data1.update(cell_hardware(hw_data1))
     cellular_data1.update(cell_network_lte(network_data1))
     cellular_data1.update(cell_radio(radio_data1))
