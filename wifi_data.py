@@ -11,9 +11,9 @@ class sshClient(SSHClient):  #Extends the paramiko.SSHClient Class for code re-u
     AutoAddPolicy = paramiko.AutoAddPolicy()
 
 
-def terminal_command(conn, command):  # function to drive terminal commands
+def terminal_command(conn, command, sleepTime = 1):  # function to drive terminal commands
     conn.send(command + '\n')
-    time.sleep(1)
+    time.sleep(sleepTime)
     output = conn.recv(65535)
     if verbose == True:
         return output
@@ -36,6 +36,12 @@ def wifi_data0_parse(dt):
     wifi_info = {}
     wifi0 = dt.decode('utf-8')
     #print(wifi0)
+
+    # BAS 8-15 - Added ID field from AP Name
+    if (re.search('Name\s+: (\S+)', wifi0)) != None:
+        ID = re.search('Name\s+: (\S+)', wifi0).group(1)
+    else:
+        ID = "None"
     if (re.search('SSID\s+: (\S+)', wifi0)) != None:
         SSID = re.search('SSID\s+: (\S+)', wifi0).group(1)
     else:
@@ -61,12 +67,30 @@ def wifi_data0_parse(dt):
     else:
         Encryption = "None"
 
+
+    # BAS 8-15 - Added ID field from AP Name
+    wifi_info["ID"] = ID
     wifi_info["SSID"] = SSID
     wifi_info["BSSID"] = BSSID
     wifi_info["Authentication"] = Authentication
     wifi_info["RSSI"] = RSSI
     wifi_info["SNR"] = SNR
     wifi_info["Encryption"] = Encryption
+
+    # BAS 8-15 - Added Signal to match the language from Netmotion API and other calls
+    Signal = 0
+
+    try:
+        if int(RSSI) >= -50:
+            Signal = 100
+        elif int(RSSI) <= -100:
+            Signal = 0
+        else:
+            Signal = 2 * (int(RSSI) + 100)
+    except Exception:
+        Signal = 0
+
+    wifi_info["Signal"] = str(Signal)
 
     return wifi_info
 
@@ -174,8 +198,8 @@ def wifi_data():
         time.sleep(2)
         terminal_command(ir_conn, ap_passwd + "\r\n")
 
-        wifi_data0 = terminal_command(ir_conn, "show dot11 associations all-client interface Dot11Radio 1\n  ")
-        wifi_data1 = terminal_command(ir_conn, "show controllers dot11Radio 1 radio-stats\n  \n  \n")
+        wifi_data0 = terminal_command(ir_conn, "show dot11 associations all-client interface Dot11Radio 1\n  ", 1.5)
+        wifi_data1 = terminal_command(ir_conn, "show controllers dot11Radio 1 radio-stats\n  \n  \n", 1.5)
 
         #print(wifi_data0.decode('utf-8'))
         #print(wifi_data1.decode('utf-8'))
@@ -183,6 +207,7 @@ def wifi_data():
         wgb0.update(wifi_data0_parse(wifi_data0))
         wgb0.update(wifi_data1_parse(wifi_data1))
         wgb0.update({"WGB WiFi Status": "Connected"})
+        wgb0.update({"Technology": "802.11n"})
 
         wd = [wgb0]
 
