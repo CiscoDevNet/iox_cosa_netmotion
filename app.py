@@ -5,6 +5,7 @@ import wifi_data
 import active_int
 import version_data
 import time
+from threading import Thread
 
 app = Flask(__name__)
 
@@ -16,6 +17,7 @@ ver = {}
 thread0 = None
 thread1 = None
 thread2 = None
+thread3 = None
 
 
 def bg_cell():
@@ -56,10 +58,15 @@ def bg_ver():
 
 @app.route('/all')
 def cosa():
-    cd = cell_data.cell_data()
+    """cd = cell_data.cell_data()
     wd = wifi_data.wifi_data()
     wan = active_int.active_int()
-    ver = version_data.version_data()
+    ver = version_data.version_data()"""
+
+    global cd
+    global wd
+    global wan
+    global ver
 
     iox_data = {
         "Manufacturer": "Cisco",
@@ -75,7 +82,7 @@ def cosa():
 
 
 if "__main__" == __name__:
-    """print("starting background data thread")
+    print("starting background data thread")
     if thread0 is None:
         thread0 = Thread(target=bg_cell)
         thread0.daemon = True
@@ -88,6 +95,10 @@ if "__main__" == __name__:
         thread2 = Thread(target=bg_act_int)
         thread2.daemon = True
         thread2.start()
-    print("starting API app for Cisco GW data")"""
+    if thread3 is None:
+        thread3 = Thread(target=bg_ver)
+        thread3.daemon = True
+        thread3.start()
+    print("starting API app for Cisco GW data")
     app.run(host="0.0.0.0", port="8000", debug=True)
 

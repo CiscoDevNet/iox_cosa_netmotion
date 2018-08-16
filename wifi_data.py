@@ -11,7 +11,7 @@ class sshClient(SSHClient):  #Extends the paramiko.SSHClient Class for code re-u
     AutoAddPolicy = paramiko.AutoAddPolicy()
 
 
-def terminal_command(conn, command, sleepTime = 1):  # function to drive terminal commands
+def terminal_command(conn, command, sleepTime = 1.5):  # function to drive terminal commands
     conn.send(command + '\n')
     time.sleep(sleepTime)
     output = conn.recv(65535)
