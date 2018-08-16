@@ -94,6 +94,7 @@ def cosa():
 	#iox_data.update(cd)
 	#iox_data.update(wd)
 	iox_data.update({'Interface': interfaces})
+	iox_data.update({'Location': cd['Location']})
 	iox_data.update(wan)
 
 	return jsonify({'Data': iox_data})
