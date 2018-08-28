@@ -177,10 +177,6 @@ if __name__ == "__main__":
         thread1 = Thread(target=bg_wifi)
         thread1.daemon = True
         thread1.start()
-    if thread2 is None:
-        thread2 = Thread(target=bg_act_int)
-        thread2.daemon = True
-        thread2.start()
     print("starting API app for Cisco GW data")
     app.run(host="0.0.0.0", port="8000", debug=True)
 
