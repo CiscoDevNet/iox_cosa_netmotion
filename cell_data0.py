@@ -3,12 +3,15 @@ import paramiko
 import re
 import time
 import config as config
+import requests
+import json
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 verbose = True
 cellular_data0 = {}
-cellular_data1 = {}
-cell_gps_data = {}
+cell_dict_data = {}
 
 
 class sshClient(SSHClient):  #Extends the paramiko.SSHClient Class for code re-use
@@ -23,6 +26,26 @@ def terminal_command(conn, command, sleepTime = 1):  # function to drive termina
         return output
     else:
         return "No output"
+
+
+def show_all_api():
+
+    url = "https://173.166.54.195:9999/api/v1/mw/hdmrpc/showcmd"
+
+    payload = "show cell 0/0 all"
+    headers = {"Authorization": "Bearer VupYy0Zm4xq1y082VBd8BdGNOiVl88", "Content-Type": "text/plain"}
+
+    response = requests.post(url, data=payload, headers=headers, verify=False)
+
+    resp_text = response.text
+
+    # print(resp_text)
+
+    resp_data = json.loads(resp_text)
+
+    cmd_out = resp_data["output"]
+
+    return cmd_out
 
 
 # Function to convert Location data to decimal location data
@@ -191,9 +214,11 @@ def rtr_hostname(dt, cellInt):
 
     return hostname
 
+
 # Logic for getting Cell Data
 def cell_data():
-    # credentials for the router
+
+    """# credentials for the router
     ir_router = config.cfg.get("ir_router_info", "IP")
 
     ir_port = config.cfg.get("ir_router_info", "port")
@@ -213,6 +238,7 @@ def cell_data():
     # terminal commands to gather cell int 0 and cell int 1 data
     # and GPS Data
     terminal_command(ir_conn, '')
+    # terminal length 0
     hw_data0 = (terminal_command(ir_conn, 'show cell 0/0 hardware').decode("utf-8"))
     radio_data0 = (terminal_command(ir_conn, 'show cell 0/0 radio').decode("utf-8"))
     network_data0 = (terminal_command(ir_conn, 'show cell 0/0 network').decode("utf-8"))
@@ -220,58 +246,35 @@ def cell_data():
     connection_data0 = (terminal_command(ir_conn, 'show cell 0/0 connection').decode("utf-8"))
     #print(connection_data0)
 
-    hw_data1 = (terminal_command(ir_conn, 'show cell 1/0 hardware').decode("utf-8"))
-    radio_data1 = (terminal_command(ir_conn, 'show cell 1/0 radio').decode("utf-8"))
-    network_data1 = (terminal_command(ir_conn, 'show cell 1/0 network').decode("utf-8"))
-    connection_data1 = (terminal_command(ir_conn, 'show cell 1/0 connection').decode("utf-8"))
-
-    gps_data = (terminal_command(ir_conn, 'show cell 0/0 gps detail').decode("utf-8"))
-    terminal_command(ir_conn, "\x03").decode("utf-8")
-
     # Had to adjust the terminal command to allow for variable sleep timing,
     # Searching the running config takes a bit longer
-    host_data = (terminal_command(ir_conn, 'show run | include hostname', 3).decode("utf-8"))
+    host_data = (terminal_command(ir_conn, 'show run | include hostname', 3).decode("utf-8"))"""
 
+    all_data = show_all_api()
 
     #print("Cell Interface 0 Data\n")
-    cellular_data0.update(rtr_hostname(host_data, 'Cell-0'))
-    #cellular_data0.update({'ID': 'Cell 0/0'})
-    cellular_data0.update(cell_hardware(hw_data0))
-    cellular_data0.update(cell_network_lte(network_data0))
-    cellular_data0.update(cell_radio(radio_data0))
+    # cellular_data0.update(rtr_hostname(host_data, 'Cellular0/0'))
+    cellular_data0.update({'ID': 'Cellular0/0'})
+    cellular_data0.update(cell_hardware(all_data))
+    cellular_data0.update(cell_network_lte(all_data))
+    cellular_data0.update(cell_radio(all_data))
     #print(cellular_data0)
-    cellular_data0.update(cell_connection(connection_data0))
+    cellular_data0.update(cell_connection(all_data))
     #print(cellular_data0)
-    #print("\n")
-
-    #print("Cell Interface 1 Data\n")
-    cellular_data1.update(rtr_hostname(host_data, 'Cell-1'))
-    #cellular_data0.update({'ID': 'Cell 1/1'})
-    cellular_data1.update(cell_hardware(hw_data1))
-    cellular_data1.update(cell_network_lte(network_data1))
-    cellular_data1.update(cell_radio(radio_data1))
-    cellular_data1.update(cell_connection(connection_data1))
-    #print(cellular_data1)
     #print("\n")
 
     #print("Combined Cell Data")
-    cd = [cellular_data0, cellular_data1]
+    cd = [cellular_data0]
     #print(cd)
 
-    #print("GPS Data\n")
-    gps = cell_gps(gps_data)
-    #print(gps)
-    #print("\n")
-
-    #print("Cell and GPS Data combined")
+    #print("Cell Data")
     #cell_gps_data["CellularInterface"] = cd
-    cell_gps_data["CellularInterface"] = cd
-    cell_gps_data["Location"] = gps
+    cell_dict_data["CellularInterface"] = cd
     #print(cell_gps_data)
 
-    ir_client.close()
+    # ir_client.close()
 
-    return cell_gps_data
+    return cell_dict_data
 
 
-#print(cell_data())
+# print(cell_data())

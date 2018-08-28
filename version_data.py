@@ -3,7 +3,11 @@ import paramiko
 import re
 import time
 import config as config
+import requests
+import json
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 verbose = True
 ver_data = {}
@@ -13,7 +17,7 @@ class sshClient(SSHClient):  #Extends the paramiko.SSHClient Class for code re-u
     AutoAddPolicy = paramiko.AutoAddPolicy()
 
 
-def terminal_command(conn, command, sleepTime=1.5):  # function to drive terminal commands
+def terminal_command(conn, command, sleepTime = 1):  # function to drive terminal commands
     conn.send(command + '\n')
     time.sleep(sleepTime)
     output = conn.recv(65535)
@@ -21,6 +25,46 @@ def terminal_command(conn, command, sleepTime=1.5):  # function to drive termina
         return output
     else:
         return "No output"
+
+
+def show_version_api():
+
+    url = "https://173.166.54.195:9999/api/v1/mw/hdmrpc/showcmd"
+
+    payload = "show ver | include Version"
+    headers = {"Authorization": "Bearer VupYy0Zm4xq1y082VBd8BdGNOiVl88", "Content-Type": "text/plain"}
+
+    response = requests.post(url, data=payload, headers=headers, verify=False)
+
+    resp_text = response.text
+
+    # print(resp_text)
+
+    resp_data = json.loads(resp_text)
+
+    cmd_out = resp_data["output"]
+
+    return cmd_out
+
+
+def show_revision_api():
+
+    url = "https://173.166.54.195:9999/api/v1/mw/hdmrpc/showcmd"
+
+    payload = "show ver | include revision"
+    headers = {"Authorization": "Bearer VupYy0Zm4xq1y082VBd8BdGNOiVl88", "Content-Type": "text/plain"}
+
+    response = requests.post(url, data=payload, headers=headers, verify=False)
+
+    resp_text = response.text
+
+    # print(resp_text)
+
+    resp_data = json.loads(resp_text)
+
+    cmd_out = resp_data["output"]
+
+    return cmd_out
 
 
 # Clean, Filter, and Parse software version Data
@@ -64,7 +108,8 @@ def cell_hw_ver(dt):
 
 # Logic for getting Version Data
 def version_data():
-    # credentials for the router
+
+    """# credentials for the router
     ir_router = config.cfg.get("ir_router_info", "IP")
 
     ir_port = config.cfg.get("ir_router_info", "port")
@@ -83,9 +128,10 @@ def version_data():
 
     # terminal commands to gather cell int 0 and cell int 1 data
     # and GPS Data
-    terminal_command(ir_conn, '')
-    ver_data0 = (terminal_command(ir_conn, 'show ver | include Version').decode("utf-8"))
-    ver_data1 = (terminal_command(ir_conn, 'show ver | include revision', 2).decode("utf-8"))
+    terminal_command(ir_conn, '')"""
+
+    ver_data0 = show_version_api()
+    ver_data1 = show_revision_api()
 
     #print("Version Data\n")
     ver_data.update(cell_sw_ver(ver_data0))
@@ -93,9 +139,9 @@ def version_data():
     #print(ver_data)
     #print("\n")
 
-    ir_client.close()
+    # ir_client.close()
 
     return ver_data
 
 
-
+# print(version_data())

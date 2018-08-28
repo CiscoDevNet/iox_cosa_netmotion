@@ -74,12 +74,18 @@ def wifi_data0_parse(dt):
     else:
         wifi_info["ID"] = "WLAN-1".format(ID)
 
-    wifi_info["SSID"] = SSID
-    wifi_info["BSSID"] = BSSID
-    wifi_info["Authentication"] = Authentication
-    wifi_info["RSSI"] = RSSI
-    wifi_info["SNR"] = SNR
-    wifi_info["Encryption"] = Encryption
+    if SSID != "None":
+        wifi_info["SSID"] = SSID
+    if BSSID != "None":
+        wifi_info["BSSID"] = BSSID
+    if Authentication != "None":
+        wifi_info["Authentication"] = Authentication
+    if RSSI != "None":
+        wifi_info["RSSI"] = RSSI
+    if SNR != "None":
+        wifi_info["SNR"] = SNR
+    if Encryption != "None":
+        wifi_info["Encryption"] = Encryption
 
     # BAS 8-15 - Added Signal to match the language from Netmotion API and other calls
     Signal = 0
@@ -124,17 +130,9 @@ def wifi_data1_parse(dt):
 
     # Logic for getting WiFi Data
 def wifi_data():
+
     wgb0 = {
             "WGB WiFi Status": "NA",
-            "ID": "NA",
-            "Signal": "NA",
-            "RSSI": "NA",
-            "SSID": "NA",
-            "BSSID": "NA",
-            "TxRate": "NA",
-            "RxRate": "NA",
-            "Authentication": "NA",
-            "Encryption": "NA"
             }
 
     ir_router = config.cfg.get("ir_router_info", "IP")
@@ -198,16 +196,19 @@ def wifi_data():
         # wifi_conn = wifi_client.invoke_shell()
 
         ## Remote AP Access
-        terminal_command(ir_conn, 'ssh -l %s %s' % (ap_user, ap_ip))
-        time.sleep(2)
-        terminal_command(ir_conn, ap_passwd + "\r\n", 2.5)
+        apd1 = terminal_command(ir_conn, 'ssh -l %s %s' % (ap_user, ap_ip), 3)
+        #time.sleep(2)
+        apd2 = terminal_command(ir_conn, ap_passwd + "\r\n", 3)
         #time.sleep(1)
+
+        #print(apd1)
+        #print(apd2)
 
 
         wifi_data0 = terminal_command(ir_conn, "show dot11 associations all-client interface Dot11Radio 1\n  ")
         wifi_data1 = terminal_command(ir_conn, "show controllers dot11Radio 1 radio-stats\n  \n  \n")
 
-        #print(wifi_data0.decode('utf-8'))
+        #print(wifi_data0)
         #print(wifi_data1.decode('utf-8'))
 
         wgb0.update(wifi_data0_parse(wifi_data0))
@@ -224,4 +225,4 @@ def wifi_data():
     #return final_wifi_data
     return wgb0
 
-#print(wifi_data())
+# print(wifi_data())
