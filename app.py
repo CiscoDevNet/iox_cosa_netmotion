@@ -33,42 +33,6 @@ wan_first = 0
 ver_first = 0
 
 
-"""def bg_cell0():
-    global cd0, cd0_first
-
-    while True:
-        cd0 = cell_data0.cell_data()
-        time.sleep(3)
-        cd0_first = 1
-
-
-def bg_cell1():
-    global cd1, cd1_first
-
-    while True:
-        cd1 = cell_data1.cell_data()
-        time.sleep(3)
-        cd1_first = 1
-
-
-def bg_gps():
-    global gps, gps_first
-
-    while True:
-        gps = gps_data.gps_data()
-        time.sleep(3)
-        gps_first = 1
-
-
-def bg_ver():
-    global ver, ver_first
-
-    while True:
-        ver = version_data.version_data()
-        time.sleep(3)
-        ver_first = 1"""
-
-
 def api_calls():
     global gps, gps_first
     global ver, ver_first
@@ -77,11 +41,6 @@ def api_calls():
     global wan, wan_first
 
     while True:
-        cd0_first = 1
-        cd1_first = 1
-        gps_first = 1
-        ver_first = 1
-        wan_first = 1
 
         try:
             ver = version_data.version_data()
@@ -104,6 +63,12 @@ def api_calls():
         except BaseException as i:
             print(i)
 
+        cd0_first = 1
+        cd1_first = 1
+        gps_first = 1
+        ver_first = 1
+        wan_first = 1
+
         time.sleep(0.5)
 
 
@@ -112,25 +77,12 @@ def bg_wifi():
 
     while True:
         wd = wifi_data.wifi_data()
-        time.sleep(2)
         wd_first = 1
-
-
-"""def bg_act_int():
-    global wan, wan_first
-
-    while True:
-        wan = active_int.active_int()
         time.sleep(2)
-        wan_first = 1"""
 
 
 @app.route('/cisco_gwdata')
 def cosa():
-    """cd = cell_data.cell_data()
-    wd = wifi_data.wifi_data()
-    wan = active_int.active_int()
-    ver = version_data.version_data()"""
 
     global cd0
     global cd1
@@ -150,12 +102,9 @@ def cosa():
         all_run = cd0_first + cd1_first + gps_first + wd_first + wan_first + ver_first
 
     interfaces = list(cd0['CellularInterface'])
-    #print(interfaces)
 
     interfaces.append(cd1['CellularInterface'])
     interfaces.append(wd)
-
-    #print(interfaces)
 
     iox_data.update(ver)
     #iox_data.update(cd)
@@ -168,7 +117,7 @@ def cosa():
 
 
 if __name__ == "__main__":
-    print("starting background data thread")
+    print("starting background data threads")
     if thread0 is None:
         thread0 = Thread(target=api_calls)
         thread0.daemon = True

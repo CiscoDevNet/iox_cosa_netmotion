@@ -1,4 +1,4 @@
-descriptor-schema-version: "2.2"
+descriptor-schema-version: "2.7"
 info:
   name: coas_test
   version: latest

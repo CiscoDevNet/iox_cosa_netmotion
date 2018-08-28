@@ -7,7 +7,7 @@ import config as config
 verbose = True
 
 
-class sshClient(SSHClient):  #Extends the paramiko.SSHClient Class for code re-use
+class sshClient(SSHClient):  # Extends the paramiko.SSHClient Class for code re-use
     AutoAddPolicy = paramiko.AutoAddPolicy()
 
 
@@ -66,13 +66,21 @@ def wifi_data0_parse(dt):
         Encryption = re.search('Encryption\s+: (\S+)', wifi0).group(1)
     else:
         Encryption = "None"
+    if (re.search('Bytes\s+Input\s+:\s+(\d+)', wifi0)) != None:
+        RxBytes = re.search('Bytes\s+Input\s+:\s+(\d+)', wifi0).group(1)
+    else:
+        RxBytes = "None"
+    if (re.search('Bytes\s+Output\s+:\s+(\d+)', wifi0)) != None:
+        TxBytes = re.search('Bytes\s+Output\s+:\s+(\d+)', wifi0).group(1)
+    else:
+        TxBytes = "None"
 
 
     # BAS 8-15 - Added ID field from AP Name
     if ID != "None":
-        wifi_info["ID"] = "{}.WLAN-1".format(ID)
+        wifi_info["ID"] = "Wlan-GigabitEthernet0"
     else:
-        wifi_info["ID"] = "WLAN-1".format(ID)
+        wifi_info["ID"] = "Wlan-GigabitEthernet0"
 
     if SSID != "None":
         wifi_info["SSID"] = SSID
@@ -86,6 +94,10 @@ def wifi_data0_parse(dt):
         wifi_info["SNR"] = SNR
     if Encryption != "None":
         wifi_info["Encryption"] = Encryption
+    if RxBytes != "None":
+        wifi_info["RxBytes"] = RxBytes
+    if TxBytes != "None":
+        wifi_info["TxBytes"] = TxBytes
 
     # BAS 8-15 - Added Signal to match the language from Netmotion API and other calls
     Signal = 0
@@ -131,9 +143,7 @@ def wifi_data1_parse(dt):
     # Logic for getting WiFi Data
 def wifi_data():
 
-    wgb0 = {
-            "WGB WiFi Status": "NA",
-            }
+    wgb0 = {}
 
     ir_router = config.cfg.get("ir_router_info", "IP")
 
@@ -165,7 +175,7 @@ def wifi_data():
 
     if ap_ip == "None":
         wgb0 = {
-            "WGB WiFi Status": "Unavailable",
+            "Connected": "Disconnected",
             "ID": "None",
             "Signal": "None",
             "RSSI": "None",
@@ -204,16 +214,15 @@ def wifi_data():
         #print(apd1)
         #print(apd2)
 
-
         wifi_data0 = terminal_command(ir_conn, "show dot11 associations all-client interface Dot11Radio 1\n  ")
         wifi_data1 = terminal_command(ir_conn, "show controllers dot11Radio 1 radio-stats\n  \n  \n")
 
-        #print(wifi_data0)
-        #print(wifi_data1.decode('utf-8'))
+        # print(wifi_data0.decode('utf-8'))
+        # print(wifi_data1.decode('utf-8'))
 
         wgb0.update(wifi_data0_parse(wifi_data0))
         wgb0.update(wifi_data1_parse(wifi_data1))
-        wgb0.update({"WGB WiFi Status": "Connected"})
+        wgb0.update({"Connected": "Connected"})
         wgb0.update({"Technology": "802.11n"})
 
         #wd = [wgb0]

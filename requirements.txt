@@ -1,3 +1,5 @@
+cryptography
+pyOpenSSL
 Flask
 pysnmp
 paramiko

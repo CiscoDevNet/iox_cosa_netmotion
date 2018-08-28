@@ -1,51 +1,9 @@
-from paramiko import SSHClient as SSHClient
-import paramiko
+import hdm_api
 import re
-import time
-import config as config
-import requests
-import json
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 verbose = True
 cellular_data0 = {}
 cell_dict_data = {}
-
-
-class sshClient(SSHClient):  #Extends the paramiko.SSHClient Class for code re-use
-    AutoAddPolicy = paramiko.AutoAddPolicy()
-
-
-def terminal_command(conn, command, sleepTime = 1):  # function to drive terminal commands
-    conn.send(command + '\n')
-    time.sleep(sleepTime)
-    output = conn.recv(65535)
-    if verbose == True:
-        return output
-    else:
-        return "No output"
-
-
-def show_all_api():
-
-    url = "https://173.166.54.195:9999/api/v1/mw/hdmrpc/showcmd"
-
-    payload = "show cell 0/0 all"
-    headers = {"Authorization": "Bearer VupYy0Zm4xq1y082VBd8BdGNOiVl88", "Content-Type": "text/plain"}
-
-    response = requests.post(url, data=payload, headers=headers, verify=False)
-
-    resp_text = response.text
-
-    # print(resp_text)
-
-    resp_data = json.loads(resp_text)
-
-    cmd_out = resp_data["output"]
-
-    return cmd_out
 
 
 # Function to convert Location data to decimal location data
@@ -66,13 +24,9 @@ def cell_gps(dt):
     # Cleaning the console data
     data_clean0 = data.replace(" ", "")
     data_clean1 = data_clean0.replace("\n", " ")
-    #adding another clean for later detail lines that are seperated by commas instead of linebreaks or spaces
+    # adding another clean for later detail lines that are seperated by commas instead of linebreaks or spaces
     data_clean2 = data_clean1.replace(","," ")
     data1 = dict(re.findall(r'(\S+):(".*?"|\S+)', data_clean2))
-
-    test_dict = {"value": "1"}
-
-    test_dict.update(data1)
 
     # Parse Directional Data
     try:
@@ -107,8 +61,6 @@ def cell_connection(dt):
 
     data_clean_profiles = data_clean0.replace(",PacketSessionStatus", "")
 
-    #print('data_clean_profiles: \n{}'.format(data_clean_profiles))
-
     try:
         conn["TXbytes"] = re.search('Transmitted=(\d+)', data_clean1).group(1)
         conn["RXbytes"] = re.search('Received=(\d+)', data_clean1).group(1)
@@ -118,14 +70,10 @@ def cell_connection(dt):
 
     profiles = dict(re.findall(r'(Profile\S+)=(".*?"|\S+)', data_clean_profiles))
 
-    #print('profiles: \n{}'.format(profiles))
-
     active_prof = []
     for profile, status in profiles.items():
         if status == 'ACTIVE':
             active_prof.append(profile)
-
-    #conn['ActiveProfiles'] = active_prof
 
     return conn
 
@@ -142,7 +90,7 @@ def cell_network_lte(dt):
     data1 = dict(re.findall(r'(\S+)=(".*?"|\S+)', data_clean1))
 
     network["Roaming"] = data1.get("CurrentRoamingStatus", "None")
-    network["PLMN"] = data1.get("MobileCountryCode(MCC)", "None") + "-" + data1.get("MobileNetworkCode(MNC)", "None")
+    network["Carrier"] = data1.get("MobileCountryCode(MCC)", "None") + "-" + data1.get("MobileNetworkCode(MNC)", "None")
 
     return network
 
@@ -153,17 +101,42 @@ def cell_radio(dt):
     radio = {}
 
     data = dt
-    data_clean0 = data.replace(" ", "")
-    data_clean1 = data_clean0.replace("\n", " ")
 
-    data1 = dict(re.findall(r'(\S+)=(".*?"|\S+)', data_clean1))
-
-    radio["Technology"] = data1.get("RadioAccessTechnology(RAT)Selected", "None")
-    radio["RSSI"] = data1.get("CurrentRSSI", "None")
-    radio["RSRP"] = data1.get("CurrentRSRP", "None")
-    radio["RSRQ"] = data1.get("CurrentRSRQ", "None")
-    radio["SINR"] = data1.get("CurrentSNR", "None")
-    radio["Connected"] = data1.get("Radiopowermode", "None")
+    try:
+        radio["Technology"] = (re.search('Radio\s+Access\s+Technology\(RAT\)\s+Selected\s+=\s+(\S+)', data).group(1))
+    except Exception:
+        pass
+    try:
+        radio["RSSI"] = (re.search('Current\s+RSSI\s+=\s+(\S+\d+)', data).group(1))
+    except Exception:
+        pass
+    try:
+        radio["RSRP"] = (re.search('Current\s+RSRP\s+=\s+(\S+\d+)', data).group(1))
+    except Exception:
+        pass
+    try:
+        radio["RSRQ"] = (re.search('Current\s+RSRQ\s+=\s+(\S+\d+)', data).group(1))
+    except Exception:
+        pass
+    try:
+        radio["SINR"] = (re.search('Current\s+SNR\s+=\s+(\S+\d+)', data).group(1))
+    except Exception:
+        pass
+    try:
+        radio["Channel"] = (re.search('LTE\s+Rx\s+Channel\s+Number\s+=\s+(\d+)', data).group(1))
+    except Exception:
+        pass
+    try:
+        radio["Band"] = (re.search('LTE\s+Band\s+=\s+(\d+)', data).group(1))
+    except Exception:
+        pass
+    try:
+        if (re.search('Radio\s+power\s+mode\s+=\s+(\S+)', data).group(1)) == "online":
+            radio["Connected"] = "Connected"
+        else:
+            radio["Connected"] = "Disconnected"
+    except Exception:
+        radio["Connected"] = "Disconnected"
 
     return radio
 
@@ -186,93 +159,29 @@ def cell_hardware(dt):
     hardware["PhoneNumber"] = data1.get("DigitalNetwork-Number(MSISDN)", "None")
 
     try:
-        hardware["Carrier"] = (re.search('Carrier=(\S+)', data_clean1).group(1))
+        hardware["ISP"] = (re.search('Carrier=(\S+)', data_clean1).group(1))
     except Exception:
-        hardware["Carrier"] = "None"
+        pass
 
     return hardware
-
-
-def rtr_hostname(dt, cellInt):
-
-    hostname = {}
-
-    #Split the 3 lines (0-command entry, 1-actual response, 2-next open prompt)
-    data = dt.split('\n')
-    data_clean0 = data[1].replace(" ", "=")
-
-    #print('hostname data: {0}'.format(data_clean0))
-
-    data0 = dict(re.findall(r'(\S+)=(".*?"|\S+)', data_clean0))
-
-    try:
-        hostname['ID'] = '{0}.{1}'.format(data0['hostname'], cellInt)
-    except Exception:
-        hostname['ID'] = cellInt
-
-    #print('hostname: {0}'.format(hostname))
-
-    return hostname
 
 
 # Logic for getting Cell Data
 def cell_data():
 
-    """# credentials for the router
-    ir_router = config.cfg.get("ir_router_info", "IP")
+    # Execute Show command over IOx HDM Service API
+    all_data = hdm_api.show_cmd("show cell 0/0 all")
 
-    ir_port = config.cfg.get("ir_router_info", "port")
-
-    ir_user = config.cfg.get("ir_router_info", "user")
-
-    ir_passwd = config.cfg.get("ir_router_info", "pass")
-
-    # setting up the terminal connection to the router
-    ir_client = sshClient()
-    ir_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ir_client.connect(ir_router, port=ir_port, username=ir_user, password=ir_passwd, look_for_keys=False, allow_agent=False)
-
-    # setting up the shell to issue commands
-    ir_conn = ir_client.invoke_shell()
-
-    # terminal commands to gather cell int 0 and cell int 1 data
-    # and GPS Data
-    terminal_command(ir_conn, '')
-    # terminal length 0
-    hw_data0 = (terminal_command(ir_conn, 'show cell 0/0 hardware').decode("utf-8"))
-    radio_data0 = (terminal_command(ir_conn, 'show cell 0/0 radio').decode("utf-8"))
-    network_data0 = (terminal_command(ir_conn, 'show cell 0/0 network').decode("utf-8"))
-    terminal_command(ir_conn, "\x03").decode("utf-8")
-    connection_data0 = (terminal_command(ir_conn, 'show cell 0/0 connection').decode("utf-8"))
-    #print(connection_data0)
-
-    # Had to adjust the terminal command to allow for variable sleep timing,
-    # Searching the running config takes a bit longer
-    host_data = (terminal_command(ir_conn, 'show run | include hostname', 3).decode("utf-8"))"""
-
-    all_data = show_all_api()
-
-    #print("Cell Interface 0 Data\n")
-    # cellular_data0.update(rtr_hostname(host_data, 'Cellular0/0'))
     cellular_data0.update({'ID': 'Cellular0/0'})
     cellular_data0.update(cell_hardware(all_data))
     cellular_data0.update(cell_network_lte(all_data))
     cellular_data0.update(cell_radio(all_data))
-    #print(cellular_data0)
+
     cellular_data0.update(cell_connection(all_data))
-    #print(cellular_data0)
-    #print("\n")
 
-    #print("Combined Cell Data")
     cd = [cellular_data0]
-    #print(cd)
 
-    #print("Cell Data")
-    #cell_gps_data["CellularInterface"] = cd
     cell_dict_data["CellularInterface"] = cd
-    #print(cell_gps_data)
-
-    # ir_client.close()
 
     return cell_dict_data
 
