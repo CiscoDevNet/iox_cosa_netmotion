@@ -183,3 +183,4 @@ if __name__ == "__main__":
         thread2.start()
     print("starting API app for Cisco GW data")
     app.run(host="0.0.0.0", port="8000", debug=True)
+

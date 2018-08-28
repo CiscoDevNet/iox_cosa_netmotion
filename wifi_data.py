@@ -226,3 +226,4 @@ def wifi_data():
     return wgb0
 
 # print(wifi_data())
+
