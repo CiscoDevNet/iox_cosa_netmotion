@@ -46,22 +46,27 @@ def api_calls():
             ver = version_data.version_data()
         except BaseException as e:
             print(e)
+        time.sleep(0.1)
         try:
             gps = gps_data.gps_data()
         except BaseException as f:
             print(f)
+        time.sleep(0.1)
         try:
             cd0 = cell_data0.cell_data()
         except BaseException as g:
             print(g)
+        time.sleep(0.1)
         try:
             cd1 = cell_data1.cell_data()
         except BaseException as h:
             print(h)
+        time.sleep(0.1)
         try:
             wan = active_int.active_int()
         except BaseException as i:
             print(i)
+        time.sleep(0.1)
 
         cd0_first = 1
         cd1_first = 1

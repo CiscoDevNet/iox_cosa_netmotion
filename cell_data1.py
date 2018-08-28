@@ -126,6 +126,7 @@ def cell_data():
     all_data = hdm_api.show_cmd("show cell 1/0 all")
 
     cellular_data1.update({'ID': 'Cellular1/0'})
+    cellular_data1.update({'Type': 'cellular'})
     cellular_data1.update(cell_hardware(all_data))
     cellular_data1.update(cell_network_lte(all_data))
     cellular_data1.update(cell_radio(all_data))

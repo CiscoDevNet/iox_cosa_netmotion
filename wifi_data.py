@@ -224,6 +224,7 @@ def wifi_data():
         wgb0.update(wifi_data1_parse(wifi_data1))
         wgb0.update({"Connected": "Connected"})
         wgb0.update({"Technology": "802.11n"})
+        wgb0.update({"Type": "wifi"})
 
         #wd = [wgb0]
 
