@@ -217,8 +217,8 @@ def wifi_data():
         wifi_data0 = terminal_command(ir_conn, "show dot11 associations all-client interface Dot11Radio 1\n  ")
         wifi_data1 = terminal_command(ir_conn, "show controllers dot11Radio 1 radio-stats\n  \n  \n")
 
-        # print(wifi_data0.decode('utf-8'))
-        # print(wifi_data1.decode('utf-8'))
+        print(wifi_data0.decode('utf-8'))
+        print(wifi_data1.decode('utf-8'))
 
         wgb0.update(wifi_data0_parse(wifi_data0))
         wgb0.update(wifi_data1_parse(wifi_data1))
@@ -235,5 +235,5 @@ def wifi_data():
     #return final_wifi_data
     return wgb0
 
-# print(wifi_data())
+print(wifi_data())
 

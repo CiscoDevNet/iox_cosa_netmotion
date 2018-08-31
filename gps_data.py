@@ -24,7 +24,7 @@ def cell_gps(dt):
     data_clean0 = data.replace(" ", "")
     data_clean1 = data_clean0.replace("\n", " ")
     # adding another clean for later detail lines that are seperated by commas instead of linebreaks or spaces
-    data_clean2 = data_clean1.replace(","," ")
+    data_clean2 = data_clean1.replace(",", " ")
     data1 = dict(re.findall(r'(\S+):(".*?"|\S+)', data_clean2))
 
     # Parse Directional Data

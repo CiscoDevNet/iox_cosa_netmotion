@@ -1,0 +1,21 @@
+descriptor-schema-version: "2.2"
+info:
+  name: cosa_go:latest
+  version: latest
+app:
+  cpuarch: x86_64
+  env:
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  resources:
+    profile: c1.small
+    network:
+      -
+        interface-name: eth0
+        ports:
+          tcp:
+           - 8080
+  startup:
+    rootfs: rootfs.tar
+    target:
+    - ./gw_server
+  type: docker
