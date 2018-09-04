@@ -6,7 +6,7 @@ import (
 )
 
 type act_wan struct {
-	ActiveInterface     string
+	ActiveInterface     string     `json:",omitempty"`
 }
 
 func cell_act_wan(dt string) (string){

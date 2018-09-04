@@ -7,9 +7,9 @@ import (
 )
 
 type version_data struct {
-	DeviceID     string
-	HWVersion    string
-	FWVersion    string
+	DeviceID     string     `json:",omitempty"`
+	HWVersion    string     `json:",omitempty"`
+	FWVersion    string     `json:",omitempty"`
 }
 
 func cell_sn_ver(dt string) (string) {

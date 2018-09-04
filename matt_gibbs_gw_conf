@@ -1,0 +1,543 @@
+Current configuration : 14326 bytes
+!
+! Last configuration change at 22:30:44 UTC Fri Aug 31 2018 by ioxadmin
+! NVRAM config last updated at 12:40:10 UTC Fri Aug 31 2018
+!
+version 15.7
+service timestamps debug datetime msec localtime show-timezone
+service timestamps log datetime msec localtime show-timezone
+service password-encryption
+!
+hostname kit6-c2-rtr
+!
+boot-start-marker
+boot system flash:/ir800-universalk9-mz.SPA.157-3.M2
+boot-end-marker
+!
+!
+logging buffered 51200
+enable secret 5 $1$yl8B$viBTPUIJCZPtnKtT381AX.
+!
+no aaa new-model
+service-module wlan-ap 0 bootimage autonomous
+!
+ignition off-timer 900
+!
+ignition undervoltage threshold 11
+!
+no ignition enable
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+
+
+!
+ip dhcp excluded-address 10.9.6.0 10.9.6.20
+ip dhcp excluded-address 10.9.6.128 10.9.6.169
+ip dhcp excluded-address 10.9.6.192 10.9.6.197
+!
+ip dhcp pool 10.9.6.0
+ network 10.9.6.0 255.255.255.128
+ default-router 10.9.6.1
+ dns-server 208.67.222.222 208.67.220.220
+!
+ip dhcp pool 10.9.6.128
+ network 10.9.6.128 255.255.255.192
+ default-router 10.9.6.129
+ dns-server 208.67.222.222 208.67.220.220
+!
+ip dhcp pool 10.9.6.192
+ network 10.9.6.192 255.255.255.224
+ default-router 10.9.6.193
+ dns-server 208.67.222.222 208.67.220.220
+   remember
+!
+!
+!
+no ip domain lookup
+ip domain name iotvehicle.net
+ip name-server 208.67.222.222
+ip name-server 208.67.220.220
+ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+chat-script lte "" "AT!CALL" TIMEOUT 20 "OK"
+!
+crypto pki trustpoint IOTV-CA
+ enrollment terminal
+ serial-number none
+ fqdn kit6-c2-rtr.iotvehicle.net
+ ip-address none
+ subject-name CN=kit6-c2-rtr.iotvehicle.net,OU=c2
+ revocation-check none
+ eckeypair kit6-c2-rtr-ec
+ hash sha384
+ !
+!
+crypto pki certificate chain IOTV-CA
+ certificate 1006
+  3082033C 308202C2 A0030201 02020210 06300A06 082A8648 CE3D0403 03308187
+  310B3009 06035504 06130255 53311030 0E060355 04080C07 5665726D 6F6E7431
+  16301406 0355040A 0C0D4369 73636F20 53797374 656D7331 25302306 0355040B
+  0C1C5075 626C6963 20536563 746F7220 536F6C75 74696F6E 73205465 616D3127
+  30250603 5504030C 1E494F54 5620466C 65785650 4E20496E 7465726D 65646961
+  74652043 41203130 1E170D31 37313031 32323133 3833395A 170D3138 31303232
+  32313338 33395A30 32310B30 09060355 040B1302 63323123 30210603 55040313
+  1A6B6974 362D6332 2D727472 2E696F74 76656869 636C652E 6E657430 76301006
+  072A8648 CE3D0201 06052B81 04002203 62000459 8FDE023C 371D8AC1 F5675883
+  CB53FAD0 42B311BD CE4A4BC0 ABA22AB7 53F40F53 749C4065 7BDD0D2E 0BBF25AD
+  D3BF5783 434CEE91 D8C9E557 3057D1CE E069F0E4 13811486 0C31A47B DA82FA38
+  DFB59A4B 8B17D685 225379B3 0BF8478B 6AD512A3 82015330 82014F30 09060355
+  1D130402 3000301D 0603551D 0E041604 14861735 D808E26C F861DCE0 41B3678D
+  F34E5103 8B3081BF 0603551D 230481B7 3081B480 14EDB08C 317434A1 C072A523
+  CB4371D6 A3FBC318 E9A18197 A4819430 8191310B 30090603 55040613 02555331
+  10300E06 03550408 0C075665 726D6F6E 74311730 15060355 04070C0E 45737365
+  78204A75 6E637469 6F6E3116 30140603 55040A0C 0D436973 636F2053 79737465
+  6D733125 30230603 55040B0C 1C507562 6C696320 53656374 6F722053 6F6C7574
+  696F6E73 20546561 6D311830 16060355 04030C0F 494F5456 20466C65 7856504E
+  20434182 02100030 0E060355 1D0F0101 FF040403 02038830 3C060355 1D1F0435
+  30333031 A02FA02D 862B6874 74703A2F 2F63612E 696F7476 65686963 6C652E6E
+  65742F69 6E746572 6D656469 6174652D 312E6372 6C301306 03551D25 040C300A
+  06082B06 01050508 0202300A 06082A86 48CE3D04 03030368 00306502 3004AE71
+  B29E29E7 426E8431 6AF303FD 84E371B7 832C9415 B605B597 101DEF9F 288C4190
+  66D31B57 288FBB53 26AF1338 C4023100 B0E0DF52 FD42F401 7BB6D855 DAFCBC8F
+  DE12947E 528CD971 2C4DE144 02B4CB02 B824A254 93F75273 FFC512CF 03C51E6E
+  	quit
+ certificate ca 1000
+  308202AC 30820233 A0030201 02020210 00300A06 082A8648 CE3D0403 03308191
+  310B3009 06035504 06130255 53311030 0E060355 04080C07 5665726D 6F6E7431
+  17301506 03550407 0C0E4573 73657820 4A756E63 74696F6E 31163014 06035504
+  0A0C0D43 6973636F 20537973 74656D73 31253023 06035504 0B0C1C50 75626C69
+  63205365 63746F72 20536F6C 7574696F 6E732054 65616D31 18301606 03550403
+  0C0F494F 54562046 6C657856 504E2043 41301E17 0D313730 35313631 33323830
+  375A170D 32373035 31343133 32383037 5A308187 310B3009 06035504 06130255
+  53311030 0E060355 04080C07 5665726D 6F6E7431 16301406 0355040A 0C0D4369
+  73636F20 53797374 656D7331 25302306 0355040B 0C1C5075 626C6963 20536563
+  746F7220 536F6C75 74696F6E 73205465 616D3127 30250603 5504030C 1E494F54
+  5620466C 65785650 4E20496E 7465726D 65646961 74652043 41203130 76301006
+  072A8648 CE3D0201 06052B81 04002203 62000444 389FF470 6415544D 0F831FDF
+  5A384C75 46E9912C D35368FB 301CED25 C3984B4B 7BD979E4 06CDAA77 B8D92F91
+  4ADAEEA0 A5E9E177 3F412F4D A114ED96 B8C86868 55D7D636 1D0BA674 A1562264
+  43DF6243 47162878 3BA8A0B1 26B7F416 64B469A3 66306430 1D060355 1D0E0416
+  0414EDB0 8C317434 A1C072A5 23CB4371 D6A3FBC3 18E9301F 0603551D 23041830
+  16801403 8BDC7CC3 EF4C8CFE F49392A6 5F74CFF9 69BC4530 12060355 1D130101
+  FF040830 060101FF 02010030 0E060355 1D0F0101 FF040403 02018630 0A06082A
+  8648CE3D 04030303 67003064 02304F05 9462DC04 F5C871CC EF5C4CB0 8A6BE619
+  64A745D3 FBAE9686 296AE666 8D97B13D 407816A9 1A25E717 C26DFC38 F2CC0230
+  20B87AE7 47535538 E5B8815A 899509A4 4F82C33E 3FB68C92 16592874 487EFBA3
+  5162C0F7 E0FBEFFC DD8714EB 77A915EB
+  	quit
+license udi pid IR829-2LTE-EA-BK9 sn FTX2131Z0AS
+!
+!
+archive
+ log config
+  logging enable
+  hidekeys
+ path flash:/config-archive/
+ write-memory
+!
+no spanning-tree vlan 1
+username cisco privilege 15 secret 5 $1$V2Ah$jAdS25og0lqjxPoYnRtTG.
+username ioxadmin privilege 15
+!
+redundancy
+
+!
+crypto ikev2 authorization policy FLEXVPN-AUTHOR-POLICY
+ route set interface
+!
+crypto ikev2 proposal FLEXVPN-PROPOSAL
+ encryption aes-gcm-256
+ prf sha384
+ group 20
+!
+crypto ikev2 policy FLEXVPN-POLICY
+ proposal FLEXVPN-PROPOSAL
+!
+!
+crypto ikev2 profile FLEXVPN-PROFILE
+ match identity remote fqdn domain iotvehicle.net
+ identity local fqdn kit6-c2-rtr.iotvehicle.net
+ authentication remote ecdsa-sig
+ authentication local ecdsa-sig
+ pki trustpoint IOTV-CA
+ dpd 15 5 periodic
+ aaa authorization group cert list FLEXVPN-AUTHOR FLEXVPN-AUTHOR-POLICY
+!
+crypto ikev2 client flexvpn FLEXVPN-CLIENT
+  peer 1 199.66.188.4
+  client connect Tunnel0
+!
+!
+!
+controller Cellular 0
+ lte sim data-profile 3 attach-profile 1
+ lte gps mode standalone
+ lte gps nmea ip
+ lte modem link-recovery rssi onset-threshold -110
+ lte modem link-recovery monitor-timer 20
+ lte modem link-recovery wait-timer 10
+ lte modem link-recovery debounce-count 6
+!
+controller Cellular 1
+ lte sim data-profile 1 attach-profile 1
+ no lte gps enable
+ lte modem link-recovery rssi onset-threshold -110
+ lte modem link-recovery monitor-timer 20
+ lte modem link-recovery wait-timer 10
+ lte modem link-recovery debounce-count 6
+track timer ip route 5
+!
+track 1 ip route 10.4.3.0 255.255.255.0 reachability
+!
+track 2 ip sla 1 reachability
+ delay down 10 up 10
+!
+track 3 list boolean and
+ object 1
+ object 2
+!
+!
+!
+!
+crypto ipsec transform-set FLEXVPN-TRANSFORM-SET esp-gcm 256
+ mode transport
+!
+crypto ipsec profile FLEXVPN-IPSEC
+ set security-association lifetime kilobytes disable
+ set security-association lifetime seconds 14400
+ set transform-set FLEXVPN-TRANSFORM-SET
+ set ikev2-profile FLEXVPN-PROFILE
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 10.9.6.255 255.255.255.255
+ ip nat inside
+ ip virtual-reassembly in
+!
+interface Tunnel0
+ description FlexVPN Spoke
+ ip address negotiated
+ ip mtu 1400
+ ip tcp adjust-mss 1360
+ shutdown
+ tunnel source Loopback0
+ tunnel mode ipsec ipv4
+ tunnel destination dynamic
+ tunnel path-mtu-discovery
+ tunnel protection ipsec profile FLEXVPN-IPSEC
+!
+interface GigabitEthernet0
+ description Unused Ethernet WAN Uplink
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1
+ description WGB L2 Port (VLAN 1)
+ switchport mode access
+ no ip address
+ load-interval 30
+ spanning-tree portfast
+!
+interface GigabitEthernet2
+ description Users L2 Port (VLAN 10)
+ switchport access vlan 10
+ switchport mode access
+ no ip address
+ load-interval 30
+ spanning-tree portfast
+!
+interface GigabitEthernet3
+ description IOT L2 Port (VLAN 20)
+ switchport access vlan 20
+ switchport mode access
+ no ip address
+ load-interval 30
+ spanning-tree portfast
+!
+interface GigabitEthernet4
+ description IOT L2 Port (VLAN 20)
+ switchport access vlan 20
+ switchport mode access
+ no ip address
+ load-interval 30
+ spanning-tree portfast
+!
+interface Wlan-GigabitEthernet0
+ description L2 Trunk Port to Embedded AP
+ switchport mode trunk
+ no ip address
+!
+interface GigabitEthernet5
+ description IOx Connection
+ ip address 10.9.6.193 255.255.255.224
+ ip nat inside
+ ip virtual-reassembly in
+ load-interval 30
+ duplex auto
+ speed auto
+ ipv6 enable
+!
+interface Cellular0/0
+ description Cellular WAN Uplink - VZW
+ ip address negotiated
+ ip access-group BLOCK-PRIVATE-NETS out
+ no ip unreachables
+ ip nat outside
+ ip virtual-reassembly in
+ encapsulation slip
+ load-interval 30
+ dialer in-band
+ dialer idle-timeout 0
+ dialer string lte
+ dialer watch-group 1
+ async mode interactive
+!
+interface Cellular1/0
+ description Cellular WAN Uplink - AT&T
+ ip address negotiated
+ ip access-group BLOCK-PRIVATE-NETS out
+ no ip unreachables
+ ip nat outside
+ ip virtual-reassembly in
+ encapsulation slip
+ load-interval 30
+ dialer in-band
+ dialer idle-timeout 0
+ dialer string lte
+ dialer watch-group 2
+ async mode interactive
+!
+interface Cellular0/1
+ no ip address
+ encapsulation slip
+!
+interface Cellular1/1
+ no ip address
+ encapsulation slip
+!
+interface wlan-ap0
+ description Service module interface to manage the embedded AP
+ ip unnumbered Loopback0
+!
+interface Vlan1
+ description WGB L3 Port
+ ip address dhcp
+ ip nat outside
+ ip virtual-reassembly in
+ load-interval 30
+!
+interface Vlan10
+ description Users L3 Port
+ ip address 10.9.6.1 255.255.255.128
+ ip nat inside
+ ip virtual-reassembly in
+ load-interval 30
+!
+interface Vlan20
+ description IOT L3 Port
+ ip address 10.9.6.129 255.255.255.192
+ ip nat inside
+ ip virtual-reassembly in
+ load-interval 30
+!
+interface Async0
+ description DMS Serial Port
+ no ip address
+ encapsulation relay-line
+!
+interface Async1
+ description DMS Serial Port
+ no ip address
+ encapsulation relay-line
+!
+!
+router bgp 65009
+ bgp log-neighbor-changes
+ network 10.9.6.255 mask 255.255.255.255
+ aggregate-address 10.9.6.0 255.255.255.0 summary-only
+ neighbor 172.18.16.17 remote-as 65009
+ neighbor 172.18.16.17 password 7 15110D1F560D2532701B6373363D215011
+ neighbor 172.18.16.17 fall-over route-map FLEXVPN-BGP-FAILOVER
+!
+ip forward-protocol nd
+!
+no ip http server
+no ip http secure-server
+ip http client source-interface Loopback0
+!
+ip nat inside source static tcp 10.9.6.198 8443 interface Vlan1 8443
+ip nat inside source static tcp 10.9.6.198 22 interface Vlan1 2222
+ip nat inside source static tcp 10.9.6.198 9999 interface Vlan1 9999
+ip nat inside source static tcp 10.9.6.198 8080 interface Vlan1 8080
+ip nat inside source route-map NAT-CELL1-MAP interface Cellular0/0 overload
+ip nat inside source route-map NAT-CELL2-MAP interface Cellular1/0 overload
+ip nat inside source route-map NAT-WGB-MAP interface Vlan1 overload
+ip route 0.0.0.0 0.0.0.0 Cellular0/0 200
+ip route 0.0.0.0 0.0.0.0 Cellular1/0 250
+ip route 0.0.0.0 0.0.0.0 Vlan1 dhcp 150
+ip ssh rsa keypair-name iox-hdm-ssh
+ip ssh version 2
+ip ssh pubkey-chain
+  username ioxadmin
+   key-hash ssh-rsa D89BDBDBF3938E59F8F03D00EB90FD23 root@kit6-c2-rtr-GOS-1
+!
+ip access-list standard BLOCK-PRIVATE-NETS
+ deny   10.0.0.0 0.255.255.255
+ deny   192.168.0.0 0.0.255.255
+ deny   172.16.0.0 0.15.255.255
+ permit any
+!
+ip access-list extended NAT-LIST
+ permit ip 10.0.0.0 0.255.255.255 10.4.0.0 0.0.255.255
+ deny   ip 10.0.0.0 0.255.255.255 10.0.0.0 0.255.255.255
+ deny   ip 10.0.0.0 0.255.255.255 192.168.0.0 0.0.255.255
+ deny   ip 10.0.0.0 0.255.255.255 172.16.0.0 0.15.255.255
+ permit ip 10.0.0.0 0.255.255.255 any
+!
+!
+ip prefix-list FLEXVPN-HUB-LOOPBACKS seq 5 permit 172.18.16.17/32
+ip sla 1
+ icmp-echo 10.4.3.1 source-interface Vlan1
+ threshold 1000
+ timeout 1000
+ frequency 5
+ip sla schedule 1 life forever start-time now
+logging source-interface Loopback0
+dialer watch-list 1 ip 0.0.0.0 0.0.0.0
+dialer watch-list 2 ip 0.0.0.0 0.0.0.0
+ipv6 ioam timestamp
+!
+route-map FLEXVPN-BGP-FAILOVER permit 10
+ match ip address prefix-list FLEXVPN-HUB-LOOPBACKS
+!
+route-map NAT-CELL1-MAP permit 10
+ match ip address NAT-LIST
+ match interface Cellular0/0
+!
+route-map NAT-CELL2-MAP permit 10
+ match ip address NAT-LIST
+ match interface Cellular1/0
+!
+route-map NAT-WGB-MAP permit 10
+ match ip address NAT-LIST
+ match interface Vlan1
+!
+!
+!
+control-plane
+!
+!
+!
+ vstack
+alias exec ap service-module wlan-ap 0 session
+!
+line con 0
+ exec-timeout 300 0
+ stopbits 1
+line 1 2
+ no exec
+ transport preferred none
+ transport output none
+ stopbits 1
+ speed 115200
+line 3
+ script dialer lte
+ modem InOut
+ no exec
+ transport preferred lat pad telnet rlogin lapb-ta mop udptn v120 ssh
+ transport input all
+ transport output all
+ rxspeed 150000000
+ txspeed 50000000
+line 4
+ no activation-character
+ no exec
+ transport preferred none
+ transport input all
+ transport output all
+line 7
+ modem InOut
+ no exec
+ transport input all
+ transport output all
+line 8
+ no exec
+ transport preferred lat pad telnet rlogin lapb-ta mop udptn v120 ssh
+ transport output lat pad telnet rlogin lapb-ta mop udptn v120 ssh
+ rxspeed 150000000
+ txspeed 50000000
+line 9
+ script dialer lte
+ modem InOut
+ no exec
+ transport preferred lat pad telnet rlogin lapb-ta mop udptn v120 ssh
+ transport input all
+ transport output all
+ rxspeed 150000000
+ txspeed 50000000
+line 15
+ no exec
+ transport preferred lat pad telnet rlogin lapb-ta mop udptn v120 ssh
+ transport output lat pad telnet rlogin lapb-ta mop udptn v120 ssh
+ rxspeed 150000000
+ txspeed 50000000
+line 1/3 1/4
+ transport preferred none
+ transport output none
+ stopbits 1
+line 1/5 1/6
+ transport preferred none
+ transport output none
+ stopbits 1
+ speed 115200
+line vty 0 4
+ exec-timeout 300 0
+ login local
+ transport input ssh
+ transport output ssh
+line vty 5 40
+ exec-timeout 300 0
+ login local
+ transport input ssh
+ transport output telnet ssh
+ exec-timeout 300 0
+ login local
+ transport input ssh
+ transport output telnet ssh
+!
+no scheduler max-task-time
+relay line 2 1/6
+relay line 1 1/5
+ntp server 132.163.4.104
+ntp server 24.56.178.140
+ntp server 129.6.15.30
+iox hdm-enable
+iox client enable interface GigabitEthernet5
+no iox recovery-enable
+!
+!
+!
+!
+!
+!
+!
+end

@@ -7,20 +7,20 @@ import (
 )
 
 type Wifi_struct struct {
-	ID                 string
-	Type               string
-	Connected          string
-	BSSID              string
-	SSID               string
-	SNR                string
-	Encryption         string
-	RSSI               string
-	Technology         string
-	Authentication     string
+	ID                 string       `json:",omitempty"`
+	Type               string       `json:",omitempty"`
+	Connected          string       `json:",omitempty"`
+	BSSID              string       `json:",omitempty"`
+	SSID               string       `json:",omitempty"`
+	SNR                string       `json:",omitempty"`
+	Encryption         string       `json:",omitempty"`
+	RSSI               string       `json:",omitempty"`
+	Technology         string       `json:",omitempty"`
+	Authentication     string       `json:",omitempty"`
 	//TxRate             string
 	//RxRate             string
-	TXbytes            string
-	RXbytes            string
+	TXbytes            string       `json:",omitempty"`
+	RXbytes            string       `json:",omitempty"`
 }
 
 type Wifi_dict_data struct {
@@ -79,7 +79,7 @@ func Wifi_all(dt string) (*Wifi_struct){
 	var str = dt
 
 	ID = "Wlan-GigabitEthernet0"
-	Type = "wifi"
+	Type = "WiFi"
 
 	//Data Cleaning for Cell Data
 

@@ -9,10 +9,10 @@ import (
 )
 
 type Gps struct {
-	Latitude   string
-	Longitude  string
-	HDOP       string
-	Status     string
+	Latitude   string     `json:",omitempty"`
+	Longitude  string     `json:",omitempty"`
+	HDOP       string     `json:",omitempty"`
+	Status     string     `json:",omitempty"`
 }
 
 type Gps_loc struct {
@@ -108,7 +108,11 @@ func Cell_gps(dt string) (*Gps_loc) {
 
 	gps_data := Gps{}
 
-	gps_data.Status = Status
+	if Status == "active" {
+		gps_data.Status = "Valid"
+	}else {
+		gps_data.Status = "Invalid"
+	}
 	gps_data.HDOP = HDOP
 	gps_data.Latitude = Latitude
 	gps_data.Longitude = Longitude

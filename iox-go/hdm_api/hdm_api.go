@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"crypto/tls"
 	"encoding/json"
-	"gopkg.in/ini.v1"
 	"fmt"
 	"os"
 	"os/exec"
@@ -15,6 +14,7 @@ import (
 	"golang.org/x/crypto/ssh"
 	"net"
 	"bytes"
+	"../iox_conf"
 
 )
 
@@ -52,7 +52,7 @@ func oauth_creds() (url string, ID string, secret string){
 }
 
 func Show_cmd_ssh(command string) (string){
-	 cfg, err := ini.Load("package_config.ini")
+	 cfg, err := iox_conf.Conf_file()
 
          hostname := cfg.Section("ir_router_info").Key("IP").String()
          port := cfg.Section("ir_router_info").Key("port").String()
@@ -114,7 +114,7 @@ func Show_cmd_ssh(command string) (string){
 }
 
 func Show_cmd_ssh_ap(ip string, command string) (string){
-	 cfg, err := ini.Load("package_config.ini")
+	 cfg, err := iox_conf.Conf_file()
 	 var hostname string
 
 	 if ip != "unassigned" {
@@ -181,7 +181,7 @@ func Show_cmd_ssh_ap(ip string, command string) (string){
 }
 
 func Show_cmd(cmd string) (string) {
-	cfg, err := ini.Load("package_config.ini")
+	cfg, err := iox_conf.Conf_file()
 
 	url := cfg.Section("hdm_api_info").Key("url").String()
 

@@ -16,24 +16,27 @@ import (
 	"bytes"
 )
 
-
-type CiscoGW struct {
-	ActiveInterface     string
-	ID                  string
-	FWVersion           string
-	HWVersion           string
-	Interface           []interface{}
-	Location            gps_data.Gps
-	Manufacturer        string
-	Model               string
-
-}
-
 var all_data CiscoGW
 var gw_json  string
 var cell0 cell_data_zero.Cellular_data
+var zero_val_cell0 cell_data_zero.Cellular_data
 var cell1 cell_data_one.Cellular_data
+var zero_val_cell1 cell_data_one.Cellular_data
 var wifi_int wifi_data.Wifi_struct
+var zero_val_wifi_int wifi_data.Wifi_struct
+
+type CiscoGW struct {
+	ActiveInterface     string        `json:",omitempty"`
+	ID                  string        `json:",omitempty"`
+	FWVersion           string        `json:",omitempty"`
+	HWVersion           string        `json:",omitempty"`
+	Interface           []interface{} `json:",omitempty"`
+	Location            gps_data.Gps  `json:",omitempty"`
+	Manufacturer        string        `json:",omitempty"`
+	Model               string        `json:",omitempty"`
+
+}
+
 
 
 func JSONMarshalIndent(v interface{}, safeEncoding bool) ([]byte, error) {
@@ -61,21 +64,32 @@ func gps() {
 
 func cellular0() {
 	for {
-		cell0 = cell_data_zero.Cellular_data(cell_data_zero.Cell_data().CellularInterface)
+		pre_cell0 := cell_data_zero.Cell_data().CellularInterface
+		if pre_cell0.PhoneNumber != "" {
+			cell0 = cell_data_zero.Cellular_data(pre_cell0)
+		}
 		time.Sleep(500 * time.Millisecond)
 	}
 }
 
 func cellular1() {
 	for {
-		cell1 = cell_data_one.Cellular_data(cell_data_one.Cell_data().CellularInterface)
+		pre_cell1 := cell_data_one.Cell_data().CellularInterface
+		if pre_cell1.PhoneNumber != "" {
+			cell1 = cell_data_one.Cellular_data(pre_cell1)
+		}
 		time.Sleep(500 * time.Millisecond)
 	}
 }
 
 func wifi() {
-	wifi_int = wifi_data.Wifi_struct(wifi_data.Wifi_data().WifiInterface)
-	time.Sleep(500 * time.Millisecond)
+	for {
+		pre_wifi := wifi_data.Wifi_data().WifiInterface
+		if pre_wifi.ID != "" {
+			wifi_int = wifi_data.Wifi_struct(pre_wifi)
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
 }
 
 func act_int() {
@@ -100,7 +114,46 @@ func version() {
 
 func interfaces() {
 	for {
-		all_data.Interface = append([]interface{}{cell0, cell1, wifi_int})
+		if cell0 == zero_val_cell0 {
+			if cell1 == zero_val_cell1 {
+				if wifi_int == zero_val_wifi_int {
+					all_data.Interface = append([]interface{}{})
+				}else {
+					all_data.Interface = append([]interface{}{wifi_int})
+				}
+			}else if wifi_int == zero_val_wifi_int {
+				all_data.Interface = append([]interface{}{cell1})
+			}else {
+				all_data.Interface = append([]interface{}{cell1, wifi_int})
+			}
+		}else if cell1 == zero_val_cell1 {
+			if cell0 == zero_val_cell0 {
+				if wifi_int == zero_val_wifi_int {
+					all_data.Interface = append([]interface{}{})
+				}else {
+					all_data.Interface = append([]interface{}{wifi_int})
+				}
+			}else if wifi_int == zero_val_wifi_int {
+				all_data.Interface = append([]interface{}{cell0})
+			}else {
+				all_data.Interface = append([]interface{}{cell0, wifi_int})
+			}
+		}else if wifi_int == zero_val_wifi_int {
+			if cell1 == zero_val_cell1 {
+				if cell0 == zero_val_cell0 {
+					all_data.Interface = append([]interface{}{})
+				}else {
+					all_data.Interface = append([]interface{}{cell0})
+				}
+			}else if cell0 == zero_val_cell0 {
+				all_data.Interface = append([]interface{}{cell1})
+			}else {
+				all_data.Interface = append([]interface{}{cell0, cell1})
+			}
+		}else {
+			all_data.Interface = append([]interface{}{cell0, cell1, wifi_int})
+		}
+
 		time.Sleep(500 * time.Millisecond)
 	}
 }
@@ -114,8 +167,6 @@ func json_proc() {
 			return
 		}
 		gw_json = string(cisco_json)
-             	//fmt.Println(gw_json)
-             	//time.Sleep(5000 * time.Millisecond)
         }
 }
 

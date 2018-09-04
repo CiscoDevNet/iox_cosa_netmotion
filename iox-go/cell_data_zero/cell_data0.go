@@ -1,35 +1,34 @@
 package cell_data_zero
 
 import (
-	//"fmt"
 	"../hdm_api"
 	"regexp"
 
 )
 
 type Cellular_data struct {
-	ID          string
-	Type        string
-	IMEI        string
-	IMSI        string
-	PhoneNumber string
-	ISP         string
-	Connected   string
-	Band        string
-	Channel     string
-	SINR        string
-	RSRQ        string
-	RSRP        string
-	RSSI        string
-	Technology  string
-	Carrier     string
-	Roaming     string
-	TXbytes     string
-	RXbytes     string
+	ID          string     `json:",omitempty"`
+	Type        string     `json:",omitempty"`
+	IMEI        string     `json:",omitempty"`
+	IMSI        string     `json:",omitempty"`
+	PhoneNumber string     `json:",omitempty"`
+	ISP         string     `json:",omitempty"`
+	Connected   string     `json:",omitempty"`
+	Band        string     `json:",omitempty"`
+	Channel     string     `json:",omitempty"`
+	SINR        string     `json:",omitempty"`
+	RSRQ        string     `json:",omitempty"`
+	RSRP        string     `json:",omitempty"`
+	RSSI        string     `json:",omitempty"`
+	Technology  string     `json:",omitempty"`
+	Carrier     string     `json:",omitempty"`
+	Roaming     string     `json:",omitempty"`
+	TXbytes     string     `json:",omitempty"`
+	RXbytes     string     `json:",omitempty"`
 }
 
 type Cell_dict_data struct {
-	CellularInterface Cellular_data
+	CellularInterface Cellular_data     `json:",omitempty"`
 }
 
 func cell_data_find(str string, dt string) (string) {
