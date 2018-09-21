@@ -73,15 +73,15 @@ func Version_data() (*version_data){
 	}
 
 	if (cmd_out1 == "Error") {
-		HWVersion = ""
+		FWVersion = ""
 	}else {
-		HWVersion = cell_fw_ver(cmd_out1)
+		FWVersion = cell_fw_ver(cmd_out1)
 	}
 
 	if (cmd_out2 == "Error") {
-		FWVersion = ""
+		HWVersion = ""
 	}else {
-		FWVersion = cell_hw_ver(cmd_out2)
+		HWVersion = cell_hw_ver(cmd_out2)
 	}
 
 	ver_data := version_data{}

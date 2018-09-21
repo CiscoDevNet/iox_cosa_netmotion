@@ -1,6 +1,6 @@
-descriptor-schema-version: "2.7"
+descriptor-schema-version: "2.2"
 info:
-  name: coas_test
+  name: cosa_test:latest
   version: latest
 app:
   cpuarch: x86_64

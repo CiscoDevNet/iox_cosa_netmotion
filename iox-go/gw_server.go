@@ -50,7 +50,7 @@ func JSONMarshalIndent(v interface{}, safeEncoding bool) ([]byte, error) {
 	return b, err
 }
 
-func gps() {
+/*func gps() {
 	for {
 		gps := *gps_data.Gps_data()
 
@@ -60,26 +60,59 @@ func gps() {
 
 	}
 
+}*/
+
+func gps() {
+	gps := *gps_data.Gps_data()
+
+	all_data.Location = gps.Location
+
+	time.Sleep(500 * time.Millisecond)
+
 }
 
-func cellular0() {
+/*func cellular0() {
 	for {
 		pre_cell0 := cell_data_zero.Cell_data().CellularInterface
-		if pre_cell0.PhoneNumber != "" {
+		if pre_cell0.Connected != "Disconnected" {
 			cell0 = cell_data_zero.Cellular_data(pre_cell0)
 		}
+		*//*pre_cell1 := cell_data_one.Cell_data().CellularInterface
+		if pre_cell1.Connected != "Disconnected" {
+			cell1 = cell_data_one.Cellular_data(pre_cell1)
+		}*//*
 		time.Sleep(500 * time.Millisecond)
 	}
+}*/
+
+func cellular0() {
+	pre_cell0 := cell_data_zero.Cell_data().CellularInterface
+	if pre_cell0.ID != "" {
+		cell0 = cell_data_zero.Cellular_data(pre_cell0)
+	}
+	/*pre_cell1 := cell_data_one.Cell_data().CellularInterface
+	if pre_cell1.Connected != "Disconnected" {
+		cell1 = cell_data_one.Cellular_data(pre_cell1)
+	}*/
+	time.Sleep(500 * time.Millisecond)
 }
 
-func cellular1() {
+/*func cellular1() {
 	for {
 		pre_cell1 := cell_data_one.Cell_data().CellularInterface
-		if pre_cell1.PhoneNumber != "" {
+		if pre_cell1.Connected != "Disconnected" {
 			cell1 = cell_data_one.Cellular_data(pre_cell1)
 		}
 		time.Sleep(500 * time.Millisecond)
 	}
+}*/
+
+func cellular1() {
+	pre_cell1 := cell_data_one.Cell_data().CellularInterface
+	if pre_cell1.ID != "" {
+		cell1 = cell_data_one.Cellular_data(pre_cell1)
+	}
+	time.Sleep(500 * time.Millisecond)
 }
 
 func wifi() {
@@ -92,12 +125,20 @@ func wifi() {
 	}
 }
 
+/*
 func act_int() {
 	for {
 		act := act_int_data.Active_int()
 		all_data.ActiveInterface = act.ActiveInterface
 		time.Sleep(500 * time.Millisecond)
 	}
+}
+
+*/
+func act_int() {
+	act := act_int_data.Active_int()
+	all_data.ActiveInterface = act.ActiveInterface
+	time.Sleep(500 * time.Millisecond)
 }
 
 func version() {
@@ -158,6 +199,15 @@ func interfaces() {
 	}
 }
 
+func long_running() {
+	for {
+		act_int()
+		cellular0()
+		cellular1()
+		gps()
+	}
+}
+
 func json_proc() {
 	for {
 		read_data := all_data
@@ -176,26 +226,19 @@ func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 }
 
 func main() {
-	// defining structs / maps for GW Data
-
-
-
-	//fmt.Println(all_data.Interface[0])
-	//fmt.Println(all_data.Interface[1])
-
-	//fmt.Println(all_data)
-
-	go version()
-	go gps()
-	go cellular0()
-	go cellular1()
-	go act_int()
+	//go cellular0()
+	//go cellular1()
+	//go gps()
+	go long_running()
 	go wifi()
 	go interfaces()
+	//go act_int()
+	go version()
 	go json_proc()
 
+
 	router := httprouter.New()
-    	router.GET("/", Index)
+    	router.GET("/api/gw_stats", Index)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 

@@ -1,13 +1,16 @@
 descriptor-schema-version: "2.2"
 info:
-  name: cosa_go:latest
-  version: latest
+  name: GW Connection Service-0.8.2
+  version: 0.8.2
 app:
   cpuarch: x86_64
   env:
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
   resources:
-    profile: c1.small
+    profile: custom
+    cpu: 100
+    memory: 100
+    disk: 10
     network:
       -
         interface-name: eth0

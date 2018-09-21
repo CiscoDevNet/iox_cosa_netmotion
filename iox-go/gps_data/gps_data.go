@@ -104,11 +104,11 @@ func Cell_gps(dt string) (*Gps_loc) {
 	//GPS\s+auto\s+tracking\s+status:\s+(\S+)
 	HDOP = cell_data_find(str, `HDOP:\s+(\S+),`)
 
-	Status = cell_data_find(str, `GPS\s+auto\s+tracking\s+status:\s+(\S+)`)
+	Status = cell_data_find(str, `GPS\s+Mode\s+Used:\s+(\S+)`)
 
 	gps_data := Gps{}
 
-	if Status == "active" {
+	if Status == "standalone" {
 		gps_data.Status = "Valid"
 	}else {
 		gps_data.Status = "Invalid"

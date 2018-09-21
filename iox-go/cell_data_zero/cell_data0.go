@@ -80,12 +80,12 @@ func Cell_all(dt string) (*Cellular_data){
 
 	IMSI = cell_data_find(str, `International\s+Mobile\s+Subscriber\s+Identity\s+\(IMSI\)\s+=\s+(\S+)`)
 
-	PhoneNumber = cell_data_find(str, `Digital\s+Network\-Number\s+\(MSISDN\)\s+=\s+(\S+)`)
+	PhoneNumber = cell_data_find(str, `Digital\s+Network\-Number\s+\(MSISDN\)\s+=\s+(\d+)`)
 
 	ISP = cell_data_find(str, `Carrier\s+=\s+(\S+)`)
 
-	conn := cell_data_find(str, `Radio\s+power\s+mode\s+=\s+(\S+)`)
-	if (conn == "online") {
+	conn := cell_data_find(str, `(Data\s+Transmitted\s+=\s+\d+\s+bytes)`)
+	if (conn != "") {
 		Connected = "Connected"
 	} else {
 		Connected = "Disconnected"
