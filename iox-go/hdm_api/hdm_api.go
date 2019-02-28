@@ -23,7 +23,9 @@ type dec struct {
 	RetCode     string    `json:"return-code"`
 }
 
-func source_env() {
+// Below functionality for source_env and oauth_creds has been removed.  Can Delete functions
+
+/*func source_env() {
 	cmd := exec.Command("sh", "-c", "source /data/.env")
 	cmd.Run()
 	fmt.Println(os.Getenv("OAUTH_CLIENT_ID"))
@@ -49,7 +51,9 @@ func oauth_creds() (url string, ID string, secret string){
 	//fmt.Println(secret)
 
 	return url, ID, secret
-}
+}*/
+
+// This function executes terminal commands on the SSH console session to the main router.
 
 func Show_cmd_ssh(command string) (string){
 	 cfg, err := iox_conf.Conf_file()
@@ -66,7 +70,6 @@ func Show_cmd_ssh(command string) (string){
                          return nil
                  },
          }
-         //fmt.Println("\nConnecting to ", hostname, port)
 
          hostaddress := strings.Join([]string{hostname, port}, ":")
          client, err := ssh.Dial("tcp", hostaddress, config)
@@ -115,6 +118,8 @@ func Show_cmd_ssh(command string) (string){
 		 }
 	 }
 }
+
+// This function executes terminal commands on the WiFi AP terminal session.
 
 func Show_cmd_ssh_ap(ip string, command string) (string){
 	 cfg, err := iox_conf.Conf_file()
@@ -186,6 +191,8 @@ func Show_cmd_ssh_ap(ip string, command string) (string){
 	 }
 }
 
+
+// This function executes terminal commands through the HDM API interface that the IOx team released.
 func Show_cmd(cmd string) (string) {
 	cfg, err := iox_conf.Conf_file()
 
